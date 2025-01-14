@@ -5,7 +5,7 @@ import { PriceSettings } from './components/PriceSettings';
 import { SavedLocations } from './components/SavedLocations';
 import { FareTransactions } from './components/FareTransactions';
 import { Seat } from './components/Seat';
-import { fetchPriceSettings, getFareTransactions, getTotalFareAmount } from './lib/api';
+import { deleteFareTransactions, fetchPriceSettings, getFareTransactions, getFareTransactionsIds, getTotalFareAmount } from './lib/api';
 import type { SeatStatus, FareHistory, PriceSettings as PriceSettingsType, FareTransaction } from './types';
 
 const App: React.FC = () => {
@@ -46,17 +46,68 @@ const App: React.FC = () => {
     ));
   };
 
-  const handleReset = () => {
-    const newHistory: FareHistory = {
-      id: Date.now().toString(),
-      timestamp: new Date().toLocaleString(),
-      totalAmount: totalCollection,
-      seatCount: seats.filter(s => s.occupied).length
-    };
-    setHistory([newHistory, ...history]);
-    setTotalCollection(0);
-    toast.success('Total fare amount has been reset');
+
+  const handleReset = async () => {
+    try {
+      // Fetch the IDs of all fare transactions
+      const ids = await getFareTransactionsIds();
+  
+      if (ids.length === 0) {
+        toast.error('No fare transactions found to delete');
+        return;
+      }
+  
+      // Await the asynchronous delete operation and pass the IDs
+      const deletionSuccess = await deleteFareTransactions(ids);
+  
+      if (deletionSuccess) {
+        // Clear the transactions array to hide the FareTransactions div
+        setTransactions([]); // This will trigger a re-render and hide the div
+        toast.success('All transactions deleted successfully');
+      } else {
+        toast.error('Failed to delete transactions');
+      }
+  
+      // Reset total fare amount and show success toast
+      setTotalCollection(0);
+      toast.success('Total fare amount has been reset');
+    } catch (error) {
+      // Handle any errors during the delete operation
+      console.error('Error deleting transactions:', error);
+      toast.error('Failed to delete transactions');
+    }
   };
+
+  const handleReset2 = async () => {
+    try {
+      // Fetch the IDs of all fare transactions
+      const ids = await getFareTransactionsIds();
+  
+      if (ids.length === 0) {
+        toast.error('No fare transactions found to delete');
+        return;
+      }
+  
+      // Await the asynchronous delete operation and pass the IDs
+      const deletionSuccess = await deleteFareTransactions(ids);
+  
+      if (deletionSuccess) {
+        toast.success('All transactions deleted successfully');
+      } else {
+        toast.error('Failed to delete transactions');
+      }
+  
+      // Reset total fare amount and show success toast
+      setTotalCollection(0);
+      toast.success('Total fare amount has been reset');
+    } catch (error) {
+      // Handle any errors during the delete operation
+      console.error('Error deleting transactions:', error);
+      toast.error('Failed to delete transactions');
+    }
+  };
+  
+ 
 
   const handleSaveSettings = (settings: Omit<PriceSettingsType, 'id'>) => {
     setSavedLocations([...savedLocations, { ...settings, id: Date.now().toString() }]);
@@ -100,6 +151,7 @@ const App: React.FC = () => {
             <FareTransactions
               transactions={transactions}
               total={totalCollection}
+              
             />
           </div>
         )}
