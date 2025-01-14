@@ -7,7 +7,10 @@ import { locations } from '../data/locations';
 interface FareTransactionsProps {
   transactions: FareTransaction[];
   total: number;
+
 }
+
+
 
 export const FareTransactions: React.FC<FareTransactionsProps> = ({ 
   transactions,
@@ -16,6 +19,8 @@ export const FareTransactions: React.FC<FareTransactionsProps> = ({
   const getLocationName = (id: string) => {
     return locations.find(loc => loc.id === id)?.name || 'Unknown';
   };
+
+  
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
