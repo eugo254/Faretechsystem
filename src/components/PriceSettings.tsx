@@ -27,6 +27,10 @@ export const PriceSettings: React.FC<PriceSettingsProps> = ({ onSave, onClose })
     
     try {
       const data = await savePriceSettings(from, to, peakPrice, offPeakPrice);
+      if (!data) {
+        toast.error('Failed to save price settings');
+        return;
+      }
       onSave({ 
         from, 
         to, 
@@ -37,11 +41,14 @@ export const PriceSettings: React.FC<PriceSettingsProps> = ({ onSave, onClose })
       onClose();
     } catch (error) {
       console.error('Error saving price settings:', error);
-      toast.error('Failed to save price settings');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save price settings';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // ... rest of the component remains exactly the same ...
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
